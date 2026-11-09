@@ -1,0 +1,19 @@
+# Text is stored and checked out with LF line endings
+* text=auto eol=lf
+
+# Binary files
+*.pdf binary
+*.ttf binary
+*.webp binary
+*.png binary
+*.jpg binary
+*.ico binary
+
+# Third-party data, kept out of GitHub's language stats and diffs
+public/benchmarks/** linguist-vendored
+data-src/** linguist-vendored
+
+# Generated files (src/gl/world/inland.ts by scripts/bake-earth.mjs; the star data: bsc5.json by
+# scripts/bake-bsc5.mjs, and stars.json, a lighter cut of the same catalogue: its 904 stars to magnitude 4.5)
+src/gl/world/inland.ts linguist-generated
+public/data/*.json linguist-generated

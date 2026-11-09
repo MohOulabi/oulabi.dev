@@ -1,0 +1,20 @@
+# https://editorconfig.org: for editors. Biome formats by biome.json, which uses the same settings.
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+indent_style = space
+indent_size = 2
+insert_final_newline = true
+trim_trailing_whitespace = true
+max_line_length = 100
+
+[*.md]
+trim_trailing_whitespace = false
+
+# Third-party data and served files are kept byte for byte
+[{data-src,public}/**]
+trim_trailing_whitespace = unset
+insert_final_newline = unset
+max_line_length = unset

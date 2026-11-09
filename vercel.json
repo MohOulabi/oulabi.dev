@@ -1,0 +1,82 @@
+{
+  "installCommand": "bun install --frozen-lockfile",
+  "redirects": [
+    {
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "aloulabi-portfolio.vercel.app"
+        }
+      ],
+      "destination": "https://oulabi.dev/$1",
+      "permanent": true
+    },
+    {
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "mohammadaloulabi.com"
+        }
+      ],
+      "destination": "https://oulabi.dev/$1",
+      "permanent": true
+    },
+    {
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.mohammadaloulabi.com"
+        }
+      ],
+      "destination": "https://oulabi.dev/$1",
+      "permanent": true
+    },
+    {
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.oulabi.dev"
+        }
+      ],
+      "destination": "https://oulabi.dev/$1",
+      "permanent": true
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(llms|llms-full).txt",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "text/markdown; charset=utf-8"
+        },
+        {
+          "key": "X-Robots-Tag",
+          "value": "googlebot: noindex"
+        }
+      ]
+    },
+    {
+      "source": "/(index|_not-found).txt",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex"
+        }
+      ]
+    },
+    {
+      "source": "/__next(.*)",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex"
+        }
+      ]
+    }
+  ]
+}

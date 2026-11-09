@@ -1,0 +1,1159 @@
+/* The CV sheet (full-cv.tsx): an editorial one-pager in the show's language. A dark sheet rises over the show, which
+ * stays behind it dimmed and softly blurred. The journal's small mono labels sit in the margin, the name is the
+ * serif of the figures' lines with the Arabic in gold beneath, and the one gold mark is the present (the current role,
+ * the center of the orbit). Motion is once and calm: the sheet rises, its sections ease in, nothing bounces. */
+
+/* while the sheet is open the page behind cannot scroll at all (a scrollbar drag, middle-click autoscroll). Where the
+   scrollbar takes room (Windows, or "always show scroll bars"), its place is kept so nothing behind shifts sideways;
+   overlay scrollbars take none, and a kept gutter would narrow the show (full-cv.tsx sets both classes) */
+html.cv-open {
+  overflow: hidden;
+}
+
+html.cv-open.cv-gutter {
+  scrollbar-gutter: stable;
+}
+
+.cv {
+  --cv-bg: #090a0f;
+  --cv-bar: 64px;
+  --cv-pad: clamp(22px, 5vw, 72px);
+  --cv-label-w: 168px;
+  /* the page's faint, a little brighter on the sheet: its small mono (dates, hosts, labels) reads at AA (5.2:1) */
+  --faint: rgb(238 242 248 / 0.52);
+
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  color: var(--star);
+  background: transparent;
+}
+
+.cv[open] {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.cv::backdrop {
+  background: rgb(4 5 8 / 0.52);
+  -webkit-backdrop-filter: blur(14px) saturate(0.85);
+  backdrop-filter: blur(14px) saturate(0.85);
+}
+
+.cv[open]::backdrop {
+  animation: cv-fade 0.7s var(--ease) both;
+}
+
+.cv[data-closing]::backdrop {
+  animation: cv-fade-out 0.38s var(--ease-io) both;
+}
+
+/* ------------------------------------------------------------------ the sheet (it is the scroller) */
+
+.cv-sheet {
+  position: relative;
+  width: min(1100px, 100% - 64px);
+  height: calc(100% - clamp(24px, 5.5svh, 60px));
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  /* what Tab or Shift+Tab brings into view lands clear of the sticky bar */
+  scroll-padding-top: calc(var(--cv-bar) + 24px);
+  scroll-padding-bottom: 24px;
+  /* the system scrollbar is hidden: the sheet draws its own slim rail (.cv-rail) */
+  scrollbar-width: none;
+  border: 1px solid rgb(238 242 248 / 0.09);
+  border-bottom: 0;
+  border-radius: 18px 18px 0 0;
+  background:
+    radial-gradient(70% 420px at 92% 0%, rgb(233 184 102 / 0.075), transparent 70%),
+    radial-gradient(50% 300px at 0% 0%, rgb(120 140 200 / 0.04), transparent 70%), var(--cv-bg);
+  background-attachment: local, local, scroll;
+  box-shadow:
+    0 -30px 120px rgb(0 0 0 / 0.55),
+    inset 0 1px 0 rgb(238 242 248 / 0.05);
+  outline: none;
+  animation: cv-rise 0.85s var(--ease) both;
+}
+
+.cv[data-closing] .cv-sheet {
+  animation: cv-sink 0.36s cubic-bezier(0.5, 0, 0.75, 0) both;
+}
+
+.cv-sheet::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+/* the sheet's own scrollbar: a slim thumb with no track, under the bar, inside the sheet's rounded edge. It brightens
+   while the sheet moves and widens under the pointer; it can be dragged, and a press on its rail pages (full-cv.tsx) */
+.cv-rail-wrap {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  height: 0;
+}
+
+.cv-rail {
+  position: absolute;
+  top: calc(var(--cv-bar) + 8px);
+  right: 3px;
+  width: 12px;
+  height: calc(var(--cv-vh, 600px) - var(--cv-bar) - 26px);
+  cursor: default;
+}
+
+.cv-rail[hidden] {
+  display: none;
+}
+
+.cv-thumb {
+  position: absolute;
+  top: 0;
+  right: 4px;
+  width: 3px;
+  min-height: 36px;
+  border-radius: 3px;
+  background: rgb(238 242 248 / 0.2);
+  transition:
+    width 0.25s var(--ease),
+    right 0.25s var(--ease),
+    background-color 0.35s var(--ease);
+}
+
+.cv-sheet[data-moving] .cv-thumb {
+  background: rgb(238 242 248 / 0.36);
+}
+
+.cv-rail:hover .cv-thumb,
+.cv-rail[data-drag] .cv-thumb {
+  right: 3px;
+  width: 5px;
+  background: rgb(238 242 248 / 0.5);
+}
+
+/* watched against the sheet less its bar (full-cv.tsx): it leaves once the sheet has scrolled a few pixels */
+.cv-top {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1px;
+  height: 80px;
+  pointer-events: none;
+}
+
+/* zero specificity: the sheet's own classes set what they need */
+:where(.cv) h4 {
+  margin: 0;
+  font-weight: 400;
+}
+
+/* ------------------------------------------------------------------ the bar: label, PDF, email, close */
+
+.cv-bar {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  height: var(--cv-bar);
+  padding: 0 calc(var(--cv-pad) - 8px) 0 var(--cv-pad);
+  border-bottom: 1px solid transparent;
+  transition:
+    background-color 0.45s var(--ease),
+    border-color 0.45s var(--ease);
+}
+
+.cv-sheet[data-scrolled] .cv-bar {
+  background: rgb(9 10 15 / 0.84);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  border-bottom-color: rgb(238 242 248 / 0.08);
+}
+
+.cv-bar-label {
+  position: relative;
+  min-width: 0;
+  height: 20px;
+  font-family: var(--mono);
+  font-size: 11px;
+  line-height: 20px;
+  letter-spacing: 0.16em;
+  color: var(--faint);
+  white-space: nowrap;
+}
+
+.cv-bar-a,
+.cv-bar-b {
+  display: block;
+  transition:
+    opacity 0.45s var(--ease),
+    transform 0.55s var(--ease);
+}
+
+.cv-bar-b {
+  position: absolute;
+  top: 0;
+  left: 0;
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 300;
+  font-size: 18px;
+  letter-spacing: -0.005em;
+  color: var(--star);
+  opacity: 0;
+  transform: translate3d(0, 8px, 0);
+}
+
+.cv-sheet[data-past] .cv-bar-a {
+  opacity: 0;
+  transform: translate3d(0, -8px, 0);
+}
+
+.cv-sheet[data-past] .cv-bar-b {
+  opacity: 1;
+  transform: none;
+}
+
+.cv-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+}
+
+/* every pill (the bar's and the end's) one height, its words on the optical centre: one line box exactly the font
+   size, the cap height trimmed where the browser can (text-box), the icons centred with the words */
+.cv-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 16px;
+  border-radius: 999px;
+  font-size: 13.5px;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  white-space: nowrap;
+  color: var(--star);
+  border: 1px solid var(--hair-2);
+  transition:
+    background-color 0.3s var(--ease),
+    border-color 0.3s var(--ease),
+    color 0.3s var(--ease);
+}
+
+.cv-btn:hover {
+  border-color: rgb(238 242 248 / 0.5);
+  background: rgb(238 242 248 / 0.05);
+}
+
+.cv-btn-solid {
+  color: var(--ink);
+  background: var(--star);
+  border-color: var(--star);
+}
+
+.cv-btn-solid:hover {
+  color: var(--ink);
+  background: #fff;
+  border-color: #fff;
+}
+
+.cv-btn svg {
+  flex: none;
+  display: block;
+}
+
+.cv-btn .cv-t {
+  display: block;
+  text-box: trim-both cap alphabetic;
+}
+
+/* the close: a circle the pills' height, a hairline like the outlined pill, so the three read as one row */
+.cv-x {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  margin-left: 2px;
+  border-radius: 50%;
+  border: 1px solid var(--hair);
+  color: var(--dim);
+  transition:
+    color 0.3s var(--ease),
+    border-color 0.3s var(--ease),
+    background-color 0.3s var(--ease);
+}
+
+.cv-x svg {
+  display: block;
+}
+
+.cv-x:hover {
+  color: var(--star);
+  border-color: var(--hair-2);
+  background: rgb(238 242 248 / 0.07);
+}
+
+.cv-narrow {
+  display: none;
+}
+
+/* ------------------------------------------------------------------ the page */
+
+.cv-page {
+  padding: 0 var(--cv-pad) clamp(48px, 9svh, 104px);
+}
+
+.cv-in {
+  animation: cv-in 0.95s var(--ease) both;
+  animation-delay: calc(0.22s + var(--i, 0) * 0.08s);
+}
+
+/* ---- masthead */
+
+.cv-mast {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 32px;
+  padding: clamp(18px, 3svh, 36px) 0 clamp(40px, 6svh, 64px);
+}
+
+.cv-mast-text {
+  min-width: 0;
+}
+
+.cv-name {
+  max-width: none;
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 300;
+  font-optical-sizing: auto;
+  font-size: clamp(44px, 3.6vw + 18px, 78px);
+  line-height: 1;
+  letter-spacing: -0.024em;
+  text-wrap: balance;
+}
+
+.cv-name-ar {
+  width: fit-content;
+  margin-top: 14px;
+  font-size: clamp(20px, 0.8vw + 14px, 27px);
+  font-weight: 300;
+  line-height: 1.3;
+  color: var(--gold);
+}
+
+.cv-role {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  margin-top: 26px;
+  font-size: 15.5px;
+  line-height: 1.4;
+  color: var(--dim);
+}
+
+.cv-dot {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--faint);
+}
+
+.cv-mark {
+  padding: 3px 9px 2px;
+  border: 1px solid rgb(233 184 102 / 0.38);
+  border-radius: 999px;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.12em;
+  color: var(--gold);
+}
+
+.cv-reach {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 22px;
+  margin-top: 16px;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+}
+
+.cv-reach a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 0;
+  color: var(--dim);
+  text-decoration: none;
+}
+
+.cv-reach a:hover {
+  color: var(--star);
+}
+
+.cv-arrow {
+  flex: none;
+  opacity: 0.6;
+  transition:
+    transform 0.35s var(--ease),
+    opacity 0.35s var(--ease);
+}
+
+a:hover > .cv-arrow,
+a:hover .cv-p-host .cv-arrow {
+  opacity: 1;
+  transform: translate3d(1.5px, -1.5px, 0);
+}
+
+/* the motif: a center and a point settling into its orbit (once) */
+.cv-orbit {
+  flex: none;
+  width: clamp(76px, 7vw, 112px);
+  height: auto;
+  margin-top: 6px;
+  overflow: visible;
+}
+
+.cv-orbit-ring {
+  fill: none;
+  stroke: rgb(238 242 248 / 0.22);
+  stroke-width: 0.8;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+  animation: cv-draw 2.2s var(--ease) 0.35s both;
+}
+
+.cv-orbit-inner {
+  fill: none;
+  stroke: rgb(238 242 248 / 0.16);
+  stroke-width: 0.8;
+  stroke-dasharray: 1.5 4;
+  animation: cv-fade 1.6s var(--ease) 0.6s both;
+}
+
+.cv-orbit-arm {
+  transform-origin: 60px 60px;
+  transform: rotate(-32deg);
+  animation: cv-orbit 2.6s var(--ease) 0.35s both;
+}
+
+.cv-orbit-pt {
+  fill: var(--star);
+  filter: drop-shadow(0 0 3px rgb(238 242 248 / 0.8));
+}
+
+.cv-orbit-sun {
+  fill: var(--gold);
+  filter: drop-shadow(0 0 5px rgb(233 184 102 / 0.9));
+}
+
+/* ---- sections: the label in the margin, the body beside it */
+
+.cv-sec {
+  display: grid;
+  grid-template-columns: var(--cv-label-w) minmax(0, 1fr);
+  gap: 0 clamp(28px, 4vw, 56px);
+  padding: clamp(36px, 5svh, 52px) 0;
+  border-top: 1px solid rgb(238 242 248 / 0.09);
+}
+
+.cv-label {
+  position: sticky;
+  top: calc(var(--cv-bar) + 18px);
+  align-self: start;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding-top: 5px;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1.5;
+  letter-spacing: 0.16em;
+  color: var(--gold);
+}
+
+.cv-label::before {
+  content: "";
+  flex: none;
+  width: 14px;
+  height: 1px;
+  margin-top: 0.75em;
+  background: currentColor;
+  opacity: 0.7;
+}
+
+.cv-sub {
+  margin-bottom: 14px;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  text-transform: lowercase;
+  color: var(--faint);
+}
+
+/* ---- summary */
+
+.cv-lede {
+  max-width: 34ch;
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 300;
+  font-optical-sizing: auto;
+  font-size: clamp(22px, 0.9vw + 15px, 29px);
+  line-height: 1.34;
+  letter-spacing: -0.008em;
+  color: var(--star);
+}
+
+.cv-figs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+  margin-top: clamp(28px, 4svh, 40px);
+  max-width: 640px;
+}
+
+.cv-figs > div {
+  padding-top: 14px;
+  border-top: 1px solid rgb(238 242 248 / 0.12);
+}
+
+.cv-figs dt {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 300;
+  font-size: clamp(28px, 1.2vw + 18px, 38px);
+  line-height: 1.05;
+  letter-spacing: -0.015em;
+  font-variant-numeric: lining-nums;
+}
+
+.cv-figs dd {
+  margin: 8px 0 0;
+  font-family: var(--mono);
+  font-size: 11px;
+  line-height: 1.5;
+  letter-spacing: 0.04em;
+  color: var(--faint);
+}
+
+/* ---- experience: a timeline, the present in gold */
+
+.cv-time > li {
+  position: relative;
+  padding: 0 0 36px 36px;
+}
+
+.cv-time > li:last-child {
+  padding-bottom: 4px;
+}
+
+.cv-time > li::before {
+  content: "";
+  position: absolute;
+  left: 4.5px;
+  top: 22px;
+  bottom: -6px;
+  width: 1px;
+  background: rgb(238 242 248 / 0.14);
+}
+
+.cv-time > li:last-child::before {
+  bottom: auto;
+  height: 40px;
+  background: linear-gradient(rgb(238 242 248 / 0.14), transparent);
+}
+
+.cv-node {
+  position: absolute;
+  left: 0;
+  top: 9px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 1px solid rgb(238 242 248 / 0.42);
+  background: var(--cv-bg);
+}
+
+.is-now .cv-node {
+  border-color: var(--gold);
+  background: var(--gold);
+  box-shadow: 0 0 12px 1px rgb(233 184 102 / 0.65);
+}
+
+.cv-role-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px 20px;
+}
+
+.cv-company {
+  font-size: clamp(19px, 0.4vw + 15px, 22px);
+  font-weight: 400;
+  line-height: 1.3;
+  letter-spacing: -0.008em;
+}
+
+.cv-when {
+  flex: none;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  font-variant-numeric: tabular-nums;
+  color: var(--faint);
+}
+
+.is-now .cv-when {
+  color: var(--gold);
+}
+
+.cv-title {
+  margin-top: 3px;
+  font-size: 14.5px;
+  line-height: 1.45;
+  color: var(--sand);
+}
+
+.cv-line {
+  margin-top: 10px;
+  max-width: 64ch;
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--dim);
+}
+
+/* ---- platforms */
+
+.cv-group + .cv-group {
+  margin-top: 30px;
+}
+
+.cv-plats {
+  border-top: 1px solid rgb(238 242 248 / 0.08);
+}
+
+.cv-plats li {
+  border-bottom: 1px solid rgb(238 242 248 / 0.08);
+}
+
+.cv-plats a {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.8fr) 12.5rem;
+  align-items: baseline;
+  gap: 4px 20px;
+  padding: 13px 2px;
+  text-decoration: none;
+}
+
+.cv-p-name {
+  font-size: 16px;
+  line-height: 1.35;
+  color: var(--star);
+  transition: color 0.3s var(--ease);
+}
+
+.cv-p-sector {
+  font-size: 14px;
+  color: var(--dim);
+}
+
+.cv-p-host {
+  display: inline-flex;
+  align-items: center;
+  justify-self: end;
+  gap: 7px;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  letter-spacing: 0.03em;
+  color: var(--faint);
+  transition: color 0.3s var(--ease);
+}
+
+.cv-plats a:hover .cv-p-name {
+  color: var(--gold);
+}
+
+.cv-plats a:hover .cv-p-host {
+  color: var(--dim);
+}
+
+.cv-more {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 24px;
+}
+
+.cv-more a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 0;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  letter-spacing: 0.03em;
+  color: var(--dim);
+  text-decoration: none;
+}
+
+.cv-more a:hover {
+  color: var(--star);
+}
+
+/* ---- skills */
+
+.cv-skills {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 30px clamp(28px, 4vw, 56px);
+}
+
+.cv-skills dt {
+  margin-bottom: 8px;
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: var(--star);
+}
+
+/* a lone last group (five areas in two columns) takes the whole row rather than leaving half of it empty */
+.cv-skills > div:last-child:nth-child(odd) {
+  grid-column: 1 / -1;
+}
+
+.cv-skills dd {
+  margin: 0;
+  overflow: hidden;
+}
+
+/* each item keeps its words together and the line breaks between items (full-cv.tsx puts a space between them). The
+   separator leads its item and the list starts one separator to the left of its column, so the separator of the item
+   that starts a line falls outside and is clipped: a line neither starts nor ends with one */
+.cv-items {
+  --sep: 1.1em;
+  margin-left: calc(var(--sep) * -1);
+  font-size: 14.5px;
+}
+
+.cv-items li {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+  padding-left: var(--sep);
+  line-height: 1.75;
+  color: var(--dim);
+}
+
+.cv-items li::before {
+  content: "·";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: var(--sep);
+  padding-right: 0.3em;
+  text-align: center;
+  color: rgb(233 184 102 / 0.65);
+}
+
+/* ---- credentials, open source and teaching */
+
+.cv-cols {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 28px clamp(24px, 3vw, 44px);
+}
+
+.cv-cols-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.cv-facts li + li {
+  margin-top: 14px;
+}
+
+.cv-fact-main {
+  display: block;
+  font-size: 15px;
+  line-height: 1.45;
+  color: var(--star);
+}
+
+.cv-fact-meta {
+  display: block;
+  margin-top: 3px;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--faint);
+}
+
+.cv-lang {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  max-width: 220px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgb(238 242 248 / 0.08);
+}
+
+.cv-lang:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.cv-lang .cv-fact-meta {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  letter-spacing: 0.06em;
+}
+
+.cv-prose {
+  max-width: 46ch;
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--dim);
+}
+
+/* ---- contact: the close of the page */
+
+.cv-close-line {
+  max-width: 24ch;
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 300;
+  font-optical-sizing: auto;
+  font-size: clamp(26px, 1.3vw + 16px, 38px);
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+}
+
+.cv-mail {
+  display: inline-block;
+  margin-top: 18px;
+  font-size: clamp(17px, 0.5vw + 13px, 20px);
+  letter-spacing: 0.01em;
+  text-decoration-color: rgb(233 184 102 / 0.5);
+}
+
+.cv-mail:hover {
+  text-decoration-color: var(--gold);
+}
+
+.cv-end-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 28px;
+}
+
+.cv-sheet :focus-visible {
+  outline: 1px solid var(--gold);
+  outline-offset: 4px;
+}
+
+/* ------------------------------------------------------------------ motion (once) */
+
+@keyframes cv-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes cv-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes cv-rise {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 56px, 0);
+  }
+}
+
+@keyframes cv-sink {
+  to {
+    opacity: 0;
+    transform: translate3d(0, 36px, 0);
+  }
+}
+
+@keyframes cv-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 16px, 0);
+  }
+}
+
+@keyframes cv-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+}
+
+@keyframes cv-orbit {
+  from {
+    transform: rotate(-150deg);
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+}
+
+/* reduced motion (the site's own switch, html.reduce-motion): a plain fade, nothing travels */
+html.reduce-motion .cv-sheet {
+  animation: cv-fade 0.25s linear both;
+}
+
+html.reduce-motion .cv[data-closing] .cv-sheet {
+  animation: cv-sink-fade 0.2s linear both;
+}
+
+html.reduce-motion .cv-in,
+html.reduce-motion .cv-orbit-ring,
+html.reduce-motion .cv-orbit-inner,
+html.reduce-motion .cv-orbit-arm {
+  animation: none;
+}
+
+/* the bar's label and name trade places by fading only */
+html.reduce-motion .cv-sheet .cv-bar-a,
+html.reduce-motion .cv-sheet .cv-bar-b {
+  transform: none;
+}
+
+@keyframes cv-sink-fade {
+  to {
+    opacity: 0;
+  }
+}
+
+/* ------------------------------------------------------------------ narrower screens */
+
+/* a tablet: a narrower margin; a platform's sector and address under its name; the skills one group a row */
+@media (max-width: 900px) {
+  .cv {
+    --cv-label-w: 120px;
+  }
+
+  .cv-cols {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .cv-skills {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 26px;
+  }
+
+  .cv-plats a {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 3px 12px;
+    padding: 14px 0;
+  }
+
+  .cv-p-name {
+    grid-column: 1 / -1;
+  }
+
+  .cv-p-sector {
+    grid-row: 2;
+    grid-column: 1;
+    font-size: 13.5px;
+  }
+
+  .cv-p-host {
+    grid-row: 2;
+    grid-column: 2;
+  }
+}
+
+/* a phone: a full-height sheet, the labels above their sections */
+/* a phone, upright or turned sideways (a short screen): the sheet fills the screen, clear of the notch */
+@media (max-width: 720px), (max-height: 520px) {
+  .cv-sheet {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    padding-bottom: env(safe-area-inset-bottom);
+    scroll-padding-top: calc(var(--cv-bar) + env(safe-area-inset-top) + 24px);
+  }
+
+  .cv-bar {
+    height: calc(var(--cv-bar) + env(safe-area-inset-top));
+    padding-top: env(safe-area-inset-top);
+  }
+
+  .cv-rail {
+    top: calc(var(--cv-bar) + env(safe-area-inset-top) + 8px);
+    height: calc(var(--cv-vh, 600px) - var(--cv-bar) - env(safe-area-inset-top) - 26px);
+  }
+}
+
+/* sideways: a slimmer bar and masthead, the margins clear of the notch; the layout stays the tablet's */
+@media (max-height: 520px) and (min-width: 721px) {
+  .cv {
+    --cv-bar: 56px;
+  }
+
+  .cv-bar {
+    padding-left: max(var(--cv-pad), env(safe-area-inset-left));
+    padding-right: max(calc(var(--cv-pad) - 8px), env(safe-area-inset-right));
+  }
+
+  .cv-page {
+    padding-left: max(var(--cv-pad), env(safe-area-inset-left));
+    padding-right: max(var(--cv-pad), env(safe-area-inset-right));
+  }
+
+  .cv-mast {
+    padding: 8px 0 36px;
+  }
+
+  /* (the close keeps its 36 px circle; a finger's 44 px reaches past it) */
+  .cv-x {
+    position: relative;
+  }
+
+  .cv-x::after {
+    content: "";
+    position: absolute;
+    inset: -5px;
+  }
+}
+
+@media (max-width: 720px) {
+  .cv {
+    --cv-bar: 58px;
+    --cv-pad: 22px;
+  }
+
+  .cv-bar {
+    padding-right: 12px;
+  }
+
+  .cv-wide {
+    display: none;
+  }
+
+  .cv-narrow {
+    display: inline;
+  }
+
+  .cv-btn {
+    height: 36px;
+    padding: 0 14px;
+    font-size: 13px;
+  }
+
+  .cv-x {
+    width: 44px;
+    height: 44px;
+    margin-left: 0;
+  }
+
+  .cv-mast {
+    gap: 12px;
+    padding-top: 10px;
+  }
+
+  .cv-name {
+    font-size: clamp(40px, 11.5vw, 52px);
+  }
+
+  .cv-orbit {
+    width: 58px;
+    margin-top: 2px;
+  }
+
+  .cv-role {
+    margin-top: 20px;
+    font-size: 15px;
+  }
+
+  /* the role on a line of its own, then the city and the hallmarks */
+  .cv-role > span:first-child {
+    flex-basis: 100%;
+  }
+
+  .cv-role .cv-dot {
+    display: none;
+  }
+
+  .cv-sec {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 34px 0;
+  }
+
+  .cv-label {
+    position: static;
+    margin-bottom: 20px;
+    padding-top: 0;
+  }
+
+  .cv-figs {
+    gap: 14px;
+  }
+
+  .cv-figs dt {
+    font-size: 26px;
+  }
+
+  .cv-figs dd {
+    font-size: 10.5px;
+  }
+
+  .cv-time > li {
+    padding-left: 28px;
+    padding-bottom: 32px;
+  }
+
+  .cv-role-head {
+    flex-direction: column-reverse;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .cv-node {
+    top: 30px;
+  }
+
+  .cv-time > li::before {
+    top: 43px;
+    bottom: -27px;
+  }
+
+  .cv-cols,
+  .cv-cols-2 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .cv-lang {
+    max-width: none;
+  }
+}

@@ -1,0 +1,16 @@
+# dependencies and builds
+node_modules
+.next
+out
+*.tsbuildinfo
+next-env.d.ts
+
+# local files
+.DS_Store
+*.log
+.vercel
+.env*
+!.env.example
+
+# screenshots from scripts/shots.mjs
+shots/

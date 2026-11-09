@@ -1,0 +1,49 @@
+{
+  "name": "oulabi.dev",
+  "version": "0.1.0",
+  "description": "Gravity, the portfolio show at oulabi.dev.",
+  "license": "MIT",
+  "author": "Mohammad AlOulabi (https://oulabi.dev)",
+  "homepage": "https://oulabi.dev",
+  "private": true,
+  "type": "module",
+  "packageManager": "bun@1.4.4",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "bunx serve@14.2.4 out",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome check",
+    "lint:fix": "biome check --write",
+    "format": "biome format --write",
+    "shots": "node scripts/shots.mjs",
+    "bake:earth": "node scripts/bake-earth.mjs",
+    "bake:stills": "node scripts/bake-stills.mjs",
+    "bake:stars": "node scripts/bake-bsc5.mjs"
+  },
+  "dependencies": {
+    "@pmndrs/detect-gpu": "6.0.29",
+    "@react-three/fiber": "9.8.2",
+    "@vercel/analytics": "^2.0.1",
+    "@vercel/speed-insights": "^2.1.0",
+    "gsap": "3.15.1",
+    "lenis": "1.3.27",
+    "next": "16.4.5",
+    "postprocessing": "6.39.6",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "three": "0.187.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.6.6",
+    "@types/node": "22.19.0",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@types/three": "0.187.0",
+    "playwright": "1.65.0",
+    "topojson-client": "3.1.0",
+    "typescript": "6.0.3",
+    "world-atlas": "2.0.2"
+  },
+  "trustedDependencies": []
+}
