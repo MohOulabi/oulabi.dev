@@ -287,7 +287,12 @@ export function Record() {
           </li>
         </ul>
         <footer className="colophon">
-          <p>{record.colophon}</p>
+          <p>
+            {record.colophon}{" "}
+            <a href={site.source} target="_blank" rel="noopener noreferrer">
+              {record.source}
+            </a>
+          </p>
           {/* how his name is written, for the people (and the searches) that spell it another way */}
           <p className="colophon-aka">
             {site.name} (

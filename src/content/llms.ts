@@ -247,6 +247,6 @@ ${cvText.languages}
 
 ## About this site
 
-${record.colophon}
+${record.colophon} The code is open: ${site.source}
 `;
 }

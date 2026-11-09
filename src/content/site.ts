@@ -12,6 +12,8 @@ export const site = {
   email: "it.moh.ou@gmail.com",
   linkedin: "https://www.linkedin.com/in/mohammad-aloulabi/",
   github: "https://github.com/MohOulabi",
+  /** This site's code. */
+  source: "https://github.com/MohOulabi/oulabi.dev",
   description:
     "Tech manager in Riyadh with 10+ years of building digital products and leading the teams behind them: Riyadh Season, Formula 1 Saudi Arabian Grand Prix and Visit Saudi ticketing, government programs and AI-driven delivery.",
 } as const;
@@ -763,6 +765,7 @@ export const record = {
   },
   colophon:
     "Made in Riyadh with coding agents. Every point of light is drawn live in WebGL; the stars are tonight's sky over Riyadh, from the Yale Bright Star Catalogue.",
+  source: "The code is open on GitHub.",
   back: "Back to the first point",
 };
 
