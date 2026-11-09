@@ -23,7 +23,7 @@ const short = (name: string) => name.match(/\(([^)]+)\)/)?.[1] ?? name;
 /** "BSc Software Engineering, Applied Science University, Amman, 2018, graded Excellent." */
 const [degree, school, schoolCity, gradYear] = finePrint.education.split(/,\s*/);
 
-const employerUrl = work.more.find((m) => m.label === "bimventures.com")?.url;
+const employerUrl = projects.find((p) => p.domain === "bimventures.com")?.url;
 
 /** The teams before BIM Ventures (career.roles), as organisations he is an alumnus of; Webook.com with its site. */
 const formerEmployers = career.roles

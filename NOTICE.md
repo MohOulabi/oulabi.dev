@@ -29,7 +29,8 @@ license:
 ## Third-party work shown as portfolio
 
 `public/work/*` are screenshots of third-party websites he worked on, shown as examples of his work. The names, marks
-and designs in them belong to their owners.
+and designs in them belong to their owners. `public/work/react-brackets.webp` shows his own open-source project,
+[react-brackets](https://react-brackets.oulabi.dev/), and is all rights reserved like the rest of his content.
 
 ## Third-party data under their own licenses
 

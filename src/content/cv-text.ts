@@ -103,8 +103,8 @@ export const cvText = {
     { title: "Frontend Developer", company: "Freelance", when: "Jan 2015 – Feb 2016", points: [] },
   ] as CVRole[],
   selectedProjects: [
-    "Events & tourism (Webook): webook.com ticketing platform · riyadhseason.com · tickets.saudiarabiangp.com (Formula 1) · book.visitsaudi.com (Visit Saudi booking)",
-    "Ventures & startups (BIM Ventures and others): bimventures.com · kafugames.com · soum.tech · skyna.com · gosteer.com · investaseel.sa",
+    "Events & tourism (Webook): webook.com ticketing platform · riyadhseason.com · tickets.saudiarabiangp.com (Formula 1) · book.visitsaudi.com (Visit Saudi booking) · kafugames.com (esports)",
+    "Ventures & startups (BIM Ventures and others): bimventures.com · soum.tech · gosteer.sa · wafrawealth.sa",
   ],
   certifications: [
     "Project Management Professional (PMP), Project Management Institute — 2025",
