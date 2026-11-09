@@ -396,7 +396,7 @@ export const proof = {
     kafu: "Technical lead, Webook",
     "smart-investor": "Tech manager, BIM Ventures",
     eeaward: "Tech manager, BIM Ventures",
-    dco: "Tech manager, BIM Ventures",
+    dco: "Technical lead, Webook",
     bimventures: "Tech manager, BIM Ventures",
     "react-brackets": "Creator",
   } as Record<string, string>,
